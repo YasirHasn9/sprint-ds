@@ -155,17 +155,42 @@ class RingBuffer:
     def __init__(self, capacity):
         self.capacity = capacity
         self.current = None
-        self.storage = DoublyLinkedList()
+        self.buffers = DoublyLinkedList()
 
     def append(self, item):
         # self.current stores the current oldest element
-        if len(self.storage) < self.capacity:
-            self.storage.add_to_tail(item)
-            self.current = self.storage.head
+        if len(self.buffers) < self.capacity:
+            self.buffers.add_to_tail(item)
+            self.current = self.buffers.head
         else:
             self.current.value = item
-            self.current = self.current.next or self.storage.head
+            self.current = self.current.next or self.buffers.head
 
     def get(self):
-        pass
+        buffers = []
+        head = self.buffers.head
+        while head:
+            buffers.append(head.value)
+            head = head.next
+        return buffers
 
+
+buffer = RingBuffer(3)
+
+buffer.get()   # should return []
+
+buffer.append('a')
+buffer.append('b')
+buffer.append('c')
+
+buffer.get()   # should return ['a', 'b', 'c']
+
+# 'd' overwrites the oldest value in the ring buffer, which is 'a'
+buffer.append('d')
+
+buffer.get()   # should return ['d', 'b', 'c']
+
+buffer.append('e')
+buffer.append('f')
+
+print(buffer.get())   # should return ['d', 'e', 'f']
